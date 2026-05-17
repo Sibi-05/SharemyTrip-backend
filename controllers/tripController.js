@@ -1,22 +1,16 @@
 const Trip = require("../models/Trip");
+const User = require("../models/User");
 
-// CREATE TRIP
 const createTrip = async (req, res) => {
   try {
-    const {
-      title,
-      from,
-      to,
-      description,
-    } = req.body;
+    const { title, from, to, description } = req.body;
 
     const media = req.files.map((file) => ({
       url: file.location,
-      mediaType: file.mimetype.startsWith("video")
-        ? "video"
-        : "image",
+      mediaType: file.mimetype.startsWith("video") ? "video" : "image",
     }));
 
+    // 1. create trip
     const trip = await Trip.create({
       user: req.user,
       title,
@@ -26,12 +20,24 @@ const createTrip = async (req, res) => {
       media,
     });
 
-    res.status(201).json(trip);
+    // 2. push trip into user
+    await User.findByIdAndUpdate(
+      req.user,
+      {
+        $push: { trips: trip._id },
+      },
+      { new: true }
+    );
+
+    res.status(201).json({
+      success: true,
+      trip,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({
-      message: error.message,
       success: false,
+      message: error.message,
     });
   }
 };
