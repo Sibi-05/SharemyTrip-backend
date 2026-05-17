@@ -124,9 +124,11 @@ const likeTrip = async (req, res) => {
 // COMMENT TRIP
 const commentTrip = async (req, res) => {
   try {
-    const { userId, text } = req.body;
+    const userId = req.user; // ✅ FIXED
+    const { text } = req.body;
+    const tripId = req.params.id;
 
-    const trip = await Trip.findById(req.params.id);
+    const trip = await Trip.findById(tripId);
 
     if (!trip) {
       return res.status(404).json({
