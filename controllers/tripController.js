@@ -84,9 +84,10 @@ const getSingleTrip = async (req, res) => {
 // LIKE TRIP
 const likeTrip = async (req, res) => {
   try {
-    const { userId } = req.body;
+    const userId = req.user; // ✅ FIXED
+    const tripId = req.params.id;
 
-    const trip = await Trip.findById(req.params.id);
+    const trip = await Trip.findById(tripId);
 
     if (!trip) {
       return res.status(404).json({
@@ -98,7 +99,9 @@ const likeTrip = async (req, res) => {
     const alreadyLiked = trip.likes.includes(userId);
 
     if (alreadyLiked) {
-      trip.likes = trip.likes.filter((id) => id.toString() !== userId);
+      trip.likes = trip.likes.filter(
+        (id) => id.toString() !== userId
+      );
     } else {
       trip.likes.push(userId);
     }
@@ -108,6 +111,7 @@ const likeTrip = async (req, res) => {
     res.status(200).json({
       success: true,
       likes: trip.likes.length,
+      liked: !alreadyLiked,
     });
   } catch (error) {
     res.status(500).json({
