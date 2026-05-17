@@ -28,9 +28,7 @@ const authMiddleware = async (
       process.env.JWT_SECRET
     );
 
-    req.user = {
-      id: decoded.id,
-    };
+    req.user = decoded.id;
 
     next();
 
