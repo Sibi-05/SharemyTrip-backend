@@ -29,11 +29,19 @@ const tripSchema = new mongoose.Schema(
     },
 
     media: [
-        {
-            type: String,
-            required: true
-        }
-    ],
+  {
+    url: {
+      type: String,
+      required: true,
+    },
+
+    mediaType: {
+      type: String,
+      enum: ["image", "video"],
+      required: true,
+    },
+  },
+],
 
     likes: [
         {
