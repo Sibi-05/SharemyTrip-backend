@@ -1,15 +1,14 @@
 const User = require("../models/User");
 
-const uploadProfileImage = async (req, res) => {
+const updateProfile = async (req, res) => {
   try {
     const userId = req.user;
 
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "Profile image is required",
-      });
-    }
+    const {
+      fullName,
+      username,
+      bio,
+    } = req.body;
 
     const user = await User.findById(userId);
 
@@ -20,20 +19,33 @@ const uploadProfileImage = async (req, res) => {
       });
     }
 
-    user.profilePic = req.file.location;
+    // UPDATE TEXT FIELDS
+
+    user.fullName = fullName || user.fullName;
+    user.username = username || user.username;
+    user.bio = bio || user.bio;
+
+    // UPDATE PROFILE IMAGE
+
+    if (req.file) {
+      user.profilePic = req.file.location;
+    }
 
     await user.save();
 
     res.status(200).json({
       success: true,
-      message: "Profile image uploaded",
-      profilePic: user.profilePic,
+      message: "Profile updated successfully",
+      user,
     });
+
   } catch (error) {
+
     res.status(500).json({
       success: false,
       message: error.message,
     });
+
   }
 };
 
@@ -54,6 +66,6 @@ module.exports = {
 };
 
 module.exports = {
-  uploadProfileImage,
+  updateProfile,
   getProfile,
 };

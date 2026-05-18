@@ -2,7 +2,7 @@ const express = require("express");
 const authMiddleware = require("../middleware/authMiddleware");
 const upload = require("../middleware/upload");
 const {
-  uploadProfileImage,
+  updateProfile,
   getProfile,
 } = require("../controllers/userController.js");
 const { registerUser, loginUser } = require("../controllers/auth");
@@ -14,10 +14,10 @@ router.post("/register", registerUser);
 router.post("/login", loginUser);
 
 router.put(
-  "/profile-image",
+  "/update-profile",
   authMiddleware,
   upload.single("profilePic"),
-  uploadProfileImage,
+  updateProfile,
 );
 router.get("/profile", authMiddleware, getProfile);
 
