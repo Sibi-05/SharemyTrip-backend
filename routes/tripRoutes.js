@@ -25,7 +25,6 @@ router.post(
 
 router.get(
     "/",
-    authMiddleware,
     getAllTrips
 );
 
