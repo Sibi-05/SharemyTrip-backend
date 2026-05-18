@@ -30,7 +30,7 @@ router.get(
 
 router.put(
   "/follow/:id",
-  protect,
+  authMiddleware,
   followUser
 );
 
