@@ -114,7 +114,7 @@ const followUser = async (
 
     const currentUser =
       await User.findById(
-        req.user.id
+        req.user
       );
 
     const targetUser =
