@@ -4,6 +4,7 @@ const upload = require("../middleware/upload");
 const {
   updateProfile,
   getProfile,
+  getUserProfile
 } = require("../controllers/userController.js");
 const { registerUser, loginUser } = require("../controllers/auth");
 
@@ -20,5 +21,10 @@ router.put(
   updateProfile,
 );
 router.get("/profile", authMiddleware, getProfile);
+
+router.get(
+  "/:id",
+  getUserProfile
+);
 
 module.exports = router;
