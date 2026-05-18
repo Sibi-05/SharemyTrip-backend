@@ -151,10 +151,10 @@ const commentTrip = async (req, res) => {
 
     const tripId = req.params.id;
 
-    if (!text || text.trim() === "") {
+    if (!text.trim()) {
       return res.status(400).json({
         success: false,
-        message: "Comment text required",
+        message: "Comment is required",
       });
     }
 
@@ -174,12 +174,16 @@ const commentTrip = async (req, res) => {
 
     await trip.save();
 
-    const updatedTrip = await Trip.findById(tripId)
-      .populate("user", "username profilePic")
-      .populate(
-        "comments.user",
-        "username profilePic"
-      );
+    const updatedTrip =
+      await Trip.findById(tripId)
+        .populate(
+          "user",
+          "username profilePic"
+        )
+        .populate(
+          "comments.user",
+          "username profilePic"
+        );
 
     res.status(200).json({
       success: true,
@@ -187,6 +191,8 @@ const commentTrip = async (req, res) => {
     });
 
   } catch (error) {
+
+    console.log(error);
 
     res.status(500).json({
       success: false,
