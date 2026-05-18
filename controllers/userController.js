@@ -4,11 +4,7 @@ const updateProfile = async (req, res) => {
   try {
     const userId = req.user;
 
-    const {
-      fullName,
-      username,
-      bio,
-    } = req.body;
+    const { fullName, username, bio } = req.body;
 
     const user = await User.findById(userId);
 
@@ -38,20 +34,19 @@ const updateProfile = async (req, res) => {
       message: "Profile updated successfully",
       user,
     });
-
   } catch (error) {
-
     res.status(500).json({
       success: false,
       message: error.message,
     });
-
   }
 };
 
 const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user).select("-password").populate("trips");
+    const user = await User.findById(req.user)
+      .select("-password")
+      .populate("trips");
 
     res.status(200).json(user);
   } catch (error) {
@@ -60,18 +55,10 @@ const getProfile = async (req, res) => {
     });
   }
 };
-const getUserProfile =
-  async (req, res) => {
-
+const getUserProfile = async (req, res) => {
   try {
-
-    const user =
-      await User.findById(
-        req.params.id
-      )
-      .select(
-        "-password"
-      )
+    const user = await User.findById(req.params.id)
+      .select("-password")
       .populate({
         path: "trips",
         options: {
@@ -82,123 +69,99 @@ const getUserProfile =
       });
 
     if (!user) {
-
-      return res.status(404)
-        .json({
-          success: false,
-          message:
-            "User not found",
-        });
-
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
     res.status(200).json(user);
-
   } catch (error) {
-
     res.status(500).json({
       success: false,
-      message:
-        error.message,
+      message: error.message,
     });
-
   }
 };
 
-const followUser = async (
-  req,
-  res
-) => {
-
+const followUser = async (req, res) => {
   try {
+    const currentUserId = req.user;
 
-    const currentUser =
-      await User.findById(
-        req.user
-      );
+    const targetUserId = req.params.id;
 
-    const targetUser =
-      await User.findById(
-        req.params.id
-      );
+    if (currentUserId === targetUserId) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot follow yourself",
+      });
+    }
+
+    const currentUser = await User.findById(currentUserId);
+
+    const targetUser = await User.findById(targetUserId);
+
+    if (!currentUser) {
+      return res.status(404).json({
+        success: false,
+        message: "Current user not found",
+      });
+    }
 
     if (!targetUser) {
-
       return res.status(404).json({
-        message: "User not found",
+        success: false,
+        message: "Target user not found",
       });
-
     }
 
-    // CAN'T FOLLOW SELF
+    // SAFE ARRAYS
 
-    if (
-      currentUser._id.toString() ===
-      targetUser._id.toString()
-    ) {
-
-      return res.status(400).json({
-        message:
-          "You can't follow yourself",
-      });
-
+    if (!Array.isArray(currentUser.following)) {
+      currentUser.following = [];
     }
 
-    const alreadyFollowing =
-      currentUser.following.includes(
-        targetUser._id
-      );
+    if (!Array.isArray(targetUser.followers)) {
+      targetUser.followers = [];
+    }
+
+    const alreadyFollowing = targetUser.followers.some(
+      (id) => id.toString() === currentUserId,
+    );
 
     if (alreadyFollowing) {
-
       // UNFOLLOW
 
-      currentUser.following =
-        currentUser.following.filter(
-          (id) =>
-            id.toString() !==
-            targetUser._id.toString()
-        );
+      targetUser.followers = targetUser.followers.filter(
+        (id) => id.toString() !== currentUserId,
+      );
 
-      targetUser.followers =
-        targetUser.followers.filter(
-          (id) =>
-            id.toString() !==
-            currentUser._id.toString()
-        );
-
+      currentUser.following = currentUser.following.filter(
+        (id) => id.toString() !== targetUserId,
+      );
     } else {
-
       // FOLLOW
 
-      currentUser.following.push(
-        targetUser._id
-      );
+      targetUser.followers.push(currentUserId);
 
-      targetUser.followers.push(
-        currentUser._id
-      );
-
+      currentUser.following.push(targetUserId);
     }
 
     await currentUser.save();
 
     await targetUser.save();
 
-    res.json({
-      following:
-        !alreadyFollowing,
+    return res.status(200).json({
+      success: true,
+      following: !alreadyFollowing,
     });
-
   } catch (error) {
+    console.log("FOLLOW ERROR:", error);
 
-    console.log(error);
-
-    res.status(500).json({
-      message:
-        "Server error",
+    return res.status(500).json({
+      success: false,
+      message: error.message,
     });
-
   }
 };
 
@@ -206,5 +169,5 @@ module.exports = {
   updateProfile,
   getProfile,
   getUserProfile,
-  followUser
+  followUser,
 };
