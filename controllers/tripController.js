@@ -46,8 +46,12 @@ const createTrip = async (req, res) => {
 const getAllTrips = async (req, res) => {
   try {
     const trips = await Trip.find()
-      .populate("user", "username profilePic")
-      .sort({ createdAt: -1 });
+  .populate("user", "username profilePic")
+  .populate(
+    "comments.user",
+    "username profilePic"
+  )
+  .sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
