@@ -39,7 +39,7 @@ const uploadProfileImage = async (req, res) => {
 
 const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user).select("-password");
+    const user = await User.findById(req.user).select("-password").populate("trips");
 
     res.status(200).json(user);
   } catch (error) {
