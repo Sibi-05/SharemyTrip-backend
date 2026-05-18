@@ -90,7 +90,9 @@ const getSingleTrip = async (req, res) => {
 // LIKE TRIP
 const likeTrip = async (req, res) => {
   try {
-    const userId = req.user; // ✅ FIXED
+
+    const userId = req.user;
+
     const tripId = req.params.id;
 
     const trip = await Trip.findById(tripId);
@@ -102,37 +104,59 @@ const likeTrip = async (req, res) => {
       });
     }
 
-    const alreadyLiked = trip.likes.includes(userId);
+    const alreadyLiked = trip.likes.some(
+      (id) => id.toString() === userId.toString()
+    );
 
     if (alreadyLiked) {
+
       trip.likes = trip.likes.filter(
-        (id) => id.toString() !== userId
+        (id) => id.toString() !== userId.toString()
       );
+
     } else {
+
       trip.likes.push(userId);
+
     }
 
     await trip.save();
 
+    const updatedTrip = await Trip.findById(tripId)
+      .populate("user", "username profilePic");
+
     res.status(200).json({
       success: true,
-      likes: trip.likes.length,
+      trip: updatedTrip,
       liked: !alreadyLiked,
     });
+
   } catch (error) {
+
     res.status(500).json({
       success: false,
       message: error.message,
     });
+
   }
 };
 
 // COMMENT TRIP
 const commentTrip = async (req, res) => {
   try {
-    const userId = req.user; // ✅ FIXED
+
+    const userId = req.user;
+
     const { text } = req.body;
+
     const tripId = req.params.id;
+
+    if (!text || text.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        message: "Comment text required",
+      });
+    }
 
     const trip = await Trip.findById(tripId);
 
@@ -150,15 +174,25 @@ const commentTrip = async (req, res) => {
 
     await trip.save();
 
+    const updatedTrip = await Trip.findById(tripId)
+      .populate("user", "username profilePic")
+      .populate(
+        "comments.user",
+        "username profilePic"
+      );
+
     res.status(200).json({
       success: true,
-      message: "Comment added",
+      trip: updatedTrip,
     });
+
   } catch (error) {
+
     res.status(500).json({
       success: false,
       message: error.message,
     });
+
   }
 };
 

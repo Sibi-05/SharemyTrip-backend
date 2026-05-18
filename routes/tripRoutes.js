@@ -37,14 +37,14 @@ router.get(
 
 
 router.put(
-    "/like/:id",
+    "/:id/like",
     authMiddleware,
     likeTrip
 );
 
 
 router.put(
-    "/comment/:id",
+    "/:id/comment",
     authMiddleware,
     commentTrip
 );
