@@ -50,7 +50,7 @@ router.put(
     commentTrip
 );
 
-router.delete("/trips/:id", authMiddleware, deleteTrip);
+router.delete("/:id", authMiddleware, deleteTrip);
 
 
 module.exports = router;
