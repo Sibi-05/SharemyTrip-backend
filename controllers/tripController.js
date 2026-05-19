@@ -206,9 +206,17 @@ const commentTrip = async (req, res) => {
   }
 };
 
-const deleteTrip = async (req, res) => {
+const deleteTrip = async (
+  req,
+  res
+) => {
   try {
-    const trip = await Trip.findById(req.params.id);
+
+    const { tripId } =
+      req.params;
+
+    const trip =
+      await Trip.findById(tripId);
 
     if (!trip) {
       return res.status(404).json({
@@ -217,22 +225,34 @@ const deleteTrip = async (req, res) => {
     }
 
     // OWNER CHECK
-
-    if (trip.user.toString() !== req.user.id) {
+    if (
+      trip.user.toString() !==
+      req.user
+    ) {
       return res.status(401).json({
         message: "Not authorized",
       });
     }
 
-    await trip.deleteOne();
+    await Trip.findByIdAndDelete(
+      tripId
+    );
 
-    res.json({
-      message: "Trip deleted successfully",
+    res.status(200).json({
+      success: true,
+      message:
+        "Trip deleted successfully",
     });
+
   } catch (error) {
+
+    console.log(error);
+
     res.status(500).json({
-      message: error.message,
+      success: false,
+      message: "Server error",
     });
+
   }
 };
 
