@@ -212,8 +212,7 @@ const deleteTrip = async (
 ) => {
   try {
 
-    const { tripId } =
-      req.params;
+    const tripId = req.params.id;
 
     const trip =
       await Trip.findById(tripId);
