@@ -7,7 +7,8 @@ const {
     getAllTrips,
     getSingleTrip,
     likeTrip,
-    commentTrip
+    commentTrip,
+    deleteTrip
 } = require("../controllers/tripController");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -48,6 +49,8 @@ router.put(
     authMiddleware,
     commentTrip
 );
+
+router.delete("/trips/:id", authMiddleware, deleteTrip);
 
 
 module.exports = router;

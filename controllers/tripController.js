@@ -206,10 +206,41 @@ const commentTrip = async (req, res) => {
   }
 };
 
+const deleteTrip = async (req, res) => {
+  try {
+    const trip = await Trip.findById(req.params.id);
+
+    if (!trip) {
+      return res.status(404).json({
+        message: "Trip not found",
+      });
+    }
+
+    // OWNER CHECK
+
+    if (trip.user.toString() !== req.user.id) {
+      return res.status(401).json({
+        message: "Not authorized",
+      });
+    }
+
+    await trip.deleteOne();
+
+    res.json({
+      message: "Trip deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   createTrip,
   getAllTrips,
   getSingleTrip,
   likeTrip,
   commentTrip,
+  deleteTrip
 };
