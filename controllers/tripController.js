@@ -1,5 +1,17 @@
 const Trip = require("../models/Trip");
 const User = require("../models/User");
+const AWS = require("aws-sdk");
+
+const s3 = new AWS.S3({
+  accessKeyId:
+    process.env.AWS_ACCESS_KEY,
+    
+  secretAccessKey:
+    process.env.AWS_SECRET_KEY,
+
+  region:
+    process.env.AWS_REGION,
+});
 
 const createTrip = async (req, res) => {
   try {
@@ -212,7 +224,8 @@ const deleteTrip = async (
 ) => {
   try {
 
-    const tripId = req.params.id;
+    const tripId =
+      req.params.id;
 
     const trip =
       await Trip.findById(tripId);
@@ -233,8 +246,46 @@ const deleteTrip = async (
       });
     }
 
+    // =========================
+    // DELETE MEDIA FROM S3
+    // =========================
+
+    for (const media of trip.media) {
+
+      // extract key from url
+      const key =
+        media.url.split(".amazonaws.com/")[1];
+
+      if (key) {
+
+        await s3
+          .deleteObject({
+            Bucket:
+              process.env.AWS_BUCKET_NAME,
+
+            Key: key,
+          })
+          .promise();
+
+      }
+    }
+
+    // =========================
+    // DELETE TRIP FROM DB
+    // =========================
+
     await Trip.findByIdAndDelete(
       tripId
+    );
+
+    // REMOVE TRIP FROM USER
+    await User.findByIdAndUpdate(
+      req.user,
+      {
+        $pull: {
+          trips: tripId,
+        },
+      }
     );
 
     res.status(200).json({
