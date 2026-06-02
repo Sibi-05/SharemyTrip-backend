@@ -13,6 +13,31 @@ const registerUser = async (req, res) => {
             password
         } = req.body;
 
+        // Check empty fields
+        if (!username || !fullName || !email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required"
+            });
+        }
+
+        // Email validation
+        if (!validator.isEmail(email)) {
+            return res.status(400).json({
+                success: false,
+                message: "Please enter a valid email"
+            });
+        }
+
+        // Password length validation
+        if (password.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 6 characters"
+            });
+        }
+
+        // Check existing user
         const existingUser = await User.findOne({
             $or: [
                 { email },
@@ -27,15 +52,19 @@ const registerUser = async (req, res) => {
             });
         }
 
+        // Hash password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        // Create user
         const newUser = await User.create({
             username,
             fullName,
             email,
             password: hashedPassword
         });
+
+        // Generate token
         const token = jwt.sign(
             {
                 id: newUser._id
@@ -46,11 +75,19 @@ const registerUser = async (req, res) => {
             }
         );
 
+        // Remove password from response
+        const userData = {
+            _id: newUser._id,
+            username: newUser.username,
+            fullName: newUser.fullName,
+            email: newUser.email
+        };
+
         res.status(201).json({
             success: true,
             message: "User registered successfully",
             token,
-            user: newUser
+            user: userData
         });
 
     } catch (error) {
