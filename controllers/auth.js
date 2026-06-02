@@ -2,6 +2,7 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+const validator = require("validator");
 
 const registerUser = async (req, res) => {
     try {
@@ -13,7 +14,7 @@ const registerUser = async (req, res) => {
             password
         } = req.body;
 
-        // Check empty fields
+
         if (!username || !fullName || !email || !password) {
             return res.status(400).json({
                 success: false,
