@@ -19,7 +19,7 @@ router.post("/create", authMiddleware, upload.array("media", 10), createTrip);
 
 router.get("/", getAllTrips);
 
-router.get("/:id", authMiddleware, getSingleTrip);
+router.get("/:id", getSingleTrip);
 
 router.delete("/:id", authMiddleware, deleteTrip);
 
