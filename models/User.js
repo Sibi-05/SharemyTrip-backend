@@ -52,6 +52,10 @@ const userSchema = new mongoose.Schema(
             ref: "Trip"
         }
     ],
+    pushToken:{
+        type: String,
+        default: null,
+    },
 
     followers: [
         {

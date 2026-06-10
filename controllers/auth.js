@@ -156,8 +156,22 @@ const loginUser = async (req, res) => {
 
 };
 
+const savePushToken = async (req, res) => {
+  const { pushToken } = req.body;
+
+  await User.findByIdAndUpdate(
+    req.user._id,
+    { pushToken }
+  );
+
+  res.status(200).json({
+    success: true,
+  });
+};
+
 
 module.exports = {
     registerUser,
-    loginUser
+    loginUser,
+    savePushToken
 };
